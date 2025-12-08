@@ -24,9 +24,10 @@ import { swaggerSpec } from './config/swagger.js';
 dotenv.config();
 
 // Initialize Prisma Client
-export const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-});
+// Prisma 5 reads DATABASE_URL from schema, Prisma 7 can use datasourceUrl option
+export const prisma = new PrismaClient(
+  process.env.DATABASE_URL ? { datasourceUrl: process.env.DATABASE_URL } : undefined
+);
 
 // Create Express app
 const app = express();

@@ -6,12 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma generate && tsc",
+    "postinstall": "npx prisma@5.19.0 generate",
+    "build": "npx prisma@5.19.0 generate && tsc",
     "start": "node dist/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
+    "prisma:generate": "npx prisma@5.19.0 generate",
+    "prisma:migrate": "npx prisma@5.19.0 migrate dev",
+    "prisma:studio": "npx prisma@5.19.0 studio",
     "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "keywords": [
     "ipam",
