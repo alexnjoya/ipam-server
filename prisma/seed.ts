@@ -4,7 +4,7 @@ import { hashPassword } from '../src/utils/password.js';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log(' Seeding database...');
 
   // Create admin user (or update password if exists)
   const adminPassword = await hashPassword('admin123');
@@ -25,26 +25,65 @@ async function main() {
 
   console.log('✅ Created/updated admin user:', admin.email);
 
-  // Create sample subnet
-  const subnet = await prisma.subnet.upsert({
+  // Create sample IPv4 subnet
+  const existingSubnet = await prisma.subnet.findFirst({
     where: {
-      networkAddress_subnetMask: {
-        networkAddress: '192.168.1.0',
-        subnetMask: 24,
-      },
-    },
-    update: {},
-    create: {
       networkAddress: '192.168.1.0',
       subnetMask: 24,
-      cidr: '192.168.1.0/24',
-      description: 'Main office network',
-      location: 'Main Office',
-      vlanId: 100,
     },
   });
 
-  console.log('✅ Created sample subnet:', subnet.cidr);
+  const subnet = existingSubnet 
+    ? await prisma.subnet.update({
+        where: { id: existingSubnet.id },
+        data: {
+          ipVersion: 'IPv4' as any,
+          cidr: '192.168.1.0/24',
+        } as any,
+      })
+    : await prisma.subnet.create({
+        data: {
+          networkAddress: '192.168.1.0',
+          subnetMask: 24,
+          ipVersion: 'IPv4' as any,
+          cidr: '192.168.1.0/24',
+          description: 'Main office network',
+          location: 'Main Office',
+          vlanId: 100,
+        } as any,
+      });
+
+  console.log('✅ Created/updated sample IPv4 subnet:', subnet.cidr);
+
+  // Create sample IPv6 subnet
+  const existingSubnet6 = await prisma.subnet.findFirst({
+    where: {
+      networkAddress: '2001:db8::',
+      subnetMask: 64,
+    },
+  });
+
+  const subnet6 = existingSubnet6
+    ? await prisma.subnet.update({
+        where: { id: existingSubnet6.id },
+        data: {
+          ipVersion: 'IPv6' as any,
+          cidr: '2001:db8::/64',
+        } as any,
+      })
+    : await prisma.subnet.create({
+        data: {
+          networkAddress: '2001:db8::',
+          subnetMask: 64,
+          ipVersion: 'IPv6' as any,
+          cidr: '2001:db8::/64',
+          description: 'Main office IPv6 network',
+          location: 'Main Office',
+          vlanId: 100,
+        } as any,
+      });
+
+  console.log('✅ Created/updated sample IPv6 subnet:', subnet6.cidr);
 
   console.log('✨ Seeding completed!');
 }
