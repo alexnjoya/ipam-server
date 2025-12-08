@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum IpVersion {
+  IPv4
+  IPv6
+}
+
+model Subnet {
+  id              String        @id @default(cuid())
+  networkAddress  String        // e.g., "192.168.1.0" or "2001:db8::"
+  subnetMask      Int           // e.g., 24 for /24 (IPv4) or 64 for /64 (IPv6)
+  ipVersion       IpVersion     @default(IPv4) // IPv4 or IPv6
+  cidr            String        // e.g., "192.168.1.0/24" or "2001:db8::/64" (computed)
+  description     String?
+  vlanId          Int?
+  location        String?
+  parentSubnetId  String?
+  parentSubnet    Subnet?       @relation("SubnetHierarchy", fields: [parentSubnetId], references: [id])
+  childSubnets    Subnet[]      @relation("SubnetHierarchy")
+  ipAddresses     IpAddress[]
+  reservations    Reservation[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([networkAddress, subnetMask, ipVersion])
+  @@index([networkAddress])
+  @@index([ipVersion])
+  @@map("subnets")
+}
+
+enum IpStatus {
+  AVAILABLE
+  RESERVED
+  ASSIGNED
+  DHCP
+  STATIC
+}
+
+model IpAddress {
+  id            String      @id @default(cuid())
+  ipAddress     String      // e.g., "192.168.1.10"
+  subnetId      String
+  subnet        Subnet      @relation(fields: [subnetId], references: [id], onDelete: Cascade)
+  status        IpStatus    @default(AVAILABLE)
+  hostname      String?
+  macAddress    String?
+  deviceName    String?
+  assignedTo    String?     // user/team name
+  description   String?
+  reservedUntil DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  history       IpHistory[]
+
+  @@unique([ipAddress])
+  @@index([subnetId])
+  @@index([status])
+  @@index([hostname])
+  @@map("ip_addresses")
+}
+
+model Reservation {
+  id          String    @id @default(cuid())
+  subnetId    String
+  subnet      Subnet    @relation(fields: [subnetId], references: [id], onDelete: Cascade)
+  startIp     String    // e.g., "192.168.1.100"
+  endIp       String    // e.g., "192.168.1.200"
+  purpose     String?
+  reservedBy  String?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([subnetId])
+  @@map("reservations")
+}
+
+model IpHistory {
+  id            String      @id @default(cuid())
+  ipAddressId  String
+  ipAddress    IpAddress   @relation(fields: [ipAddressId], references: [id], onDelete: Cascade)
+  action        String      // "created", "assigned", "released", "updated"
+  changedBy     String?
+  oldValue      Json?       // Store previous state
+  newValue      Json?       // Store new state
+  timestamp     DateTime    @default(now())
+
+  @@index([ipAddressId])
+  @@index([timestamp])
+  @@map("ip_history")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  username  String    @unique
+  email     String    @unique
+  passwordHash String
+  role      String    @default("user") // "admin", "user", "readonly"
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
