@@ -72,43 +72,6 @@ router.get('/', authenticate, getIpAddresses);
 
 /**
  * @swagger
- * /api/ip-addresses/{id}:
- *   get:
- *     summary: Get IP address by ID
- *     tags: [IP Addresses]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: IP Address ID
- *     responses:
- *       200:
- *         description: IP address details with history
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/IpAddress'
- *       404:
- *         description: IP address not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.get('/:id', authenticate, getIpAddressById);
-
-/**
- * @swagger
  * /api/ip-addresses/assign:
  *   post:
  *     summary: Assign an IP address (automatic or manual)
@@ -174,6 +137,80 @@ router.post('/assign', authenticate, assignIpAddress);
 
 /**
  * @swagger
+ * /api/ip-addresses/{id}/release:
+ *   post:
+ *     summary: Release an IP address
+ *     tags: [IP Addresses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: IP Address ID
+ *     responses:
+ *       200:
+ *         description: IP address released successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/IpAddress'
+ *       404:
+ *         description: IP address not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.post('/:id/release', authenticate, releaseIpAddress);
+
+/**
+ * @swagger
+ * /api/ip-addresses/{id}:
+ *   get:
+ *     summary: Get IP address by ID
+ *     tags: [IP Addresses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: IP Address ID
+ *     responses:
+ *       200:
+ *         description: IP address details with history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/IpAddress'
+ *       404:
+ *         description: IP address not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get('/:id', authenticate, getIpAddressById);
+
+/**
+ * @swagger
  * /api/ip-addresses/{id}:
  *   put:
  *     summary: Update IP address
@@ -234,42 +271,5 @@ router.post('/assign', authenticate, assignIpAddress);
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/:id', authenticate, updateIpAddress);
-
-/**
- * @swagger
- * /api/ip-addresses/{id}/release:
- *   post:
- *     summary: Release an IP address
- *     tags: [IP Addresses]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: IP Address ID
- *     responses:
- *       200:
- *         description: IP address released successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/IpAddress'
- *       404:
- *         description: IP address not found
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
- */
-router.post('/:id/release', authenticate, releaseIpAddress);
 
 export default router;

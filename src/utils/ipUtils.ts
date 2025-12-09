@@ -41,11 +41,27 @@ export function numberToIpv4(num: number): string {
  * Expand IPv6 address to full form (e.g., 2001:db8::1 -> 2001:0db8:0000:0000:0000:0000:0000:0001)
  */
 export function expandIpv6(ip: string): string {
+  // Trim whitespace
+  ip = ip.trim();
+  
+  // Handle empty or invalid
+  if (!ip || ip.length === 0) {
+    throw new Error('Invalid IPv6 address format');
+  }
+  
+  // Handle :: (all zeros)
+  if (ip === '::') {
+    return Array(8).fill('0000').join(':');
+  }
+  
   // Handle :: at start
   if (ip.startsWith('::')) {
     ip = ip.substring(2);
     const right = ip.split(':').filter(Boolean);
     const missing = 8 - right.length;
+    if (missing < 0) {
+      throw new Error('Invalid IPv6 address format');
+    }
     const expanded = [...Array(missing).fill('0000'), ...right];
     return expanded.map(part => part.padStart(4, '0')).join(':');
   }
@@ -55,6 +71,9 @@ export function expandIpv6(ip: string): string {
     ip = ip.substring(0, ip.length - 2);
     const left = ip.split(':').filter(Boolean);
     const missing = 8 - left.length;
+    if (missing < 0) {
+      throw new Error('Invalid IPv6 address format');
+    }
     const expanded = [...left, ...Array(missing).fill('0000')];
     return expanded.map(part => part.padStart(4, '0')).join(':');
   }
@@ -65,6 +84,9 @@ export function expandIpv6(ip: string): string {
     const left = parts[0] ? parts[0].split(':').filter(Boolean) : [];
     const right = parts[1] ? parts[1].split(':').filter(Boolean) : [];
     const missing = 8 - left.length - right.length;
+    if (missing < 0) {
+      throw new Error('Invalid IPv6 address format');
+    }
     const expanded = [...left, ...Array(missing).fill('0000'), ...right];
     return expanded.map(part => part.padStart(4, '0')).join(':');
   } else if (parts.length === 1 && !ip.includes('::')) {
@@ -73,10 +95,16 @@ export function expandIpv6(ip: string): string {
     if (segments.length === 8) {
       return segments.map(part => part.padStart(4, '0')).join(':');
     }
-    throw new Error('Invalid IPv6 address format');
+    // Handle case where we have fewer than 8 segments (shouldn't happen but handle gracefully)
+    if (segments.length < 8) {
+      const missing = 8 - segments.length;
+      const expanded = [...segments, ...Array(missing).fill('0000')];
+      return expanded.map(part => part.padStart(4, '0')).join(':');
+    }
+    throw new Error(`Invalid IPv6 address format: ${ip} (${segments.length} segments)`);
   }
   
-  throw new Error('Invalid IPv6 address format');
+  throw new Error(`Invalid IPv6 address format: ${ip}`);
 }
 
 /**
@@ -127,7 +155,15 @@ export function compressIpv6(ip: string): string {
       const before = normalized.slice(0, longestStart);
       const after = normalized.slice(longestStart + longestLength);
       const result = [...before, '', ...after].join(':');
-      return result.replace(/^:|:$/g, '') || '::';
+      // Clean up leading/trailing colons but preserve ::
+      let compressed = result.replace(/^::+|::+$/g, '::');
+      if (compressed === '') {
+        compressed = '::';
+      } else if (!compressed.includes('::')) {
+        // If no :: in result, add it where zeros were
+        compressed = result;
+      }
+      return compressed;
     }
     
     return normalized.join(':');
@@ -141,8 +177,18 @@ export function compressIpv6(ip: string): string {
  * Convert IPv6 address to BigInt (for calculations)
  */
 export function ipv6ToBigInt(ip: string): bigint {
-  const expanded = expandIpv6(ip);
+  let expanded: string;
+  try {
+    expanded = expandIpv6(ip);
+  } catch (error) {
+    throw new Error(`Failed to expand IPv6 address "${ip}": ${error instanceof Error ? error.message : String(error)}`);
+  }
+  
   const parts = expanded.split(':');
+  if (parts.length !== 8) {
+    throw new Error(`Invalid expanded IPv6 address: expected 8 segments, got ${parts.length}`);
+  }
+  
   let result = BigInt(0);
   
   for (let i = 0; i < parts.length; i++) {
@@ -162,7 +208,13 @@ export function bigIntToIpv6(num: bigint): string {
     const part = Number((num >> BigInt(i * 16)) & BigInt(0xFFFF));
     parts.push(part.toString(16).padStart(4, '0'));
   }
-  return compressIpv6(parts.join(':'));
+  const expanded = parts.join(':');
+  // Try to compress, but if it fails, return expanded form
+  try {
+    return compressIpv6(expanded);
+  } catch {
+    return expanded;
+  }
 }
 
 /**
@@ -225,10 +277,17 @@ export function getIpv6SubnetRange(networkAddress: string, subnetMask: number): 
     const startNum = networkNum + BigInt(1);
     const endNum = networkNum + totalHosts - BigInt(1);
     
+    // Cap at Number.MAX_SAFE_INTEGER to prevent overflow
+    // For very large IPv6 subnets, we'll cap the display value
+    const MAX_SAFE_TOTAL = BigInt(Number.MAX_SAFE_INTEGER);
+    const displayTotal = totalHosts > MAX_SAFE_TOTAL 
+      ? Number.MAX_SAFE_INTEGER 
+      : Number(totalHosts);
+    
     return {
       start: bigIntToIpv6(startNum),
       end: bigIntToIpv6(endNum),
-      total: Number(totalHosts),
+      total: displayTotal,
     };
   } else {
     const totalHosts = Math.pow(2, hostBits);

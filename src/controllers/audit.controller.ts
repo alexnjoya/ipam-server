@@ -51,12 +51,14 @@ export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<voi
 
     res.json({
       success: true,
-      data: logs,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        totalPages: Math.ceil(total / Number(limit)),
+      data: {
+        data: logs,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          totalPages: Math.ceil(total / Number(limit)),
+        },
       },
     });
   } catch (error) {

@@ -35,18 +35,31 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
   : ['http://localhost:5173', 'https://ipam-pi.vercel.app'];
 
+console.log('CORS allowed origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin (like mobile apps, curl, or same-origin requests)
+    if (!origin) {
+      return callback(null, true);
+    }
     
-    if (allowedOrigins.includes(origin)) {
+    // Normalize origin (remove trailing slash)
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    
+    // Check if origin is in allowed list (exact match or normalized)
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Log for debugging
+      console.log(`CORS blocked origin: ${origin}. Allowed origins:`, allowedOrigins);
+      callback(null, false); // Return false instead of error to avoid throwing
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

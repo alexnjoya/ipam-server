@@ -145,8 +145,17 @@ export const getSubnetById = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Get IP version (handle Prisma enum)
+    let ipVersion: 'IPv4' | 'IPv6' = subnet.ipVersion as 'IPv4' | 'IPv6';
+    if (typeof ipVersion !== 'string') {
+      ipVersion = String(ipVersion) as 'IPv4' | 'IPv6';
+    }
+    if (!ipVersion || (ipVersion !== 'IPv4' && ipVersion !== 'IPv6')) {
+      ipVersion = detectIpVersion(subnet.networkAddress);
+    }
+
     // Calculate utilization
-    const range = getSubnetRange(subnet.networkAddress, subnet.subnetMask, subnet.ipVersion);
+    const range = getSubnetRange(subnet.networkAddress, subnet.subnetMask, ipVersion);
     const usedCount = await prisma.ipAddress.count({
       where: {
         subnetId: id,
@@ -159,17 +168,19 @@ export const getSubnetById = async (req: AuthRequest, res: Response) => {
         status: 'RESERVED',
       },
     });
+    const availableCount = Math.max(0, range.total - usedCount - reservedCount);
 
     res.json({
       success: true,
       data: {
         ...subnet,
+        ipVersion, // Ensure ipVersion is a string
         utilization: {
           totalIPs: range.total,
           usedIPs: usedCount,
           reservedIPs: reservedCount,
-          availableIPs: range.total - usedCount - reservedCount,
-          utilizationPercentage: ((usedCount / range.total) * 100).toFixed(2),
+          availableIPs: availableCount,
+          utilizationPercentage: range.total > 0 ? ((usedCount / range.total) * 100).toFixed(2) : '0.00',
         },
       },
     });
