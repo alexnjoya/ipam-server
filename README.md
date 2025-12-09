@@ -289,10 +289,10 @@ The `npm start` command uses the `start.js` script which automatically locates `
 ### Troubleshooting
 
 **Error: "Cannot find module '/opt/render/project/src/dist/index.js'":**
-- **This means Render is NOT using `npm start`**
-- Go to Render Dashboard → Your Service → Settings → Start Command
-- Change it to: `npm start` (NOT `node dist/index.js`)
-- Save and redeploy
+- **This means Render is NOT using `npm start` OR Root Directory is misconfigured**
+- **Solution 1 (Recommended):** Go to Render Dashboard → Your Service → Settings → Start Command → Change to: `npm start`
+- **Solution 2:** Verify Root Directory is set to `server` (if repo has both client/server)
+- The build process now creates `src/dist/` as a backup, but `npm start` is still recommended
 
 **Build fails with "prisma: not found":**
 - Ensure `prisma` is in `dependencies` (not just `devDependencies`)

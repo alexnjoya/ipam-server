@@ -46,13 +46,24 @@ Note: Render automatically sets `PORT`, but you can override it if needed.
 
 ### Error: "Cannot find module '/opt/render/project/src/dist/index.js'"
 
-**Cause:** Render is running `node dist/index.js` directly instead of `npm start`.
+**Cause:** Render is running `node dist/index.js` directly instead of `npm start`, OR Render's root directory is set incorrectly.
 
-**Solution:**
+**Solution (Two Options):**
+
+**Option 1 (Recommended):** Use `npm start`
 1. Go to Render Dashboard → Your Service → Settings
 2. Find "Start Command"
 3. Change it to: `npm start`
 4. Save and redeploy
+
+**Option 2:** Fix Root Directory
+1. Go to Render Dashboard → Your Service → Settings
+2. Find "Root Directory"
+3. Set it to: `server` (if your repo has both client and server folders)
+4. Keep Start Command as: `npm start` (still recommended)
+5. Save and redeploy
+
+**Note:** The build process now automatically creates `src/dist/` as a backup location, so even if Render runs `node dist/index.js` from the wrong directory, it should work. However, using `npm start` is still the recommended approach.
 
 ### Error: "prisma: not found"
 
