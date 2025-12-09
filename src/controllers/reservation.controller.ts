@@ -10,7 +10,7 @@ import {
 } from '../utils/ipUtils.js';
 import { createReservationSchema, updateReservationSchema } from '../validations/reservation.validation.js';
 
-export const createReservation = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createReservation = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = createReservationSchema.parse(req.body);
     const { subnetId, startIp, endIp, ...reservationData } = validatedData;
@@ -21,22 +21,20 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!subnet) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
-      return;
     }
 
     // Validate IPs are within subnet
-    const ipVersion = (subnet as any).ipVersion || 'IPv4';
+    const ipVersion = (subnet as any).ipVersion;
     if (!isIpInSubnet(startIp, subnet.networkAddress, subnet.subnetMask, ipVersion) ||
         !isIpInSubnet(endIp, subnet.networkAddress, subnet.subnetMask, ipVersion)) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         error: 'IP range is not within the subnet',
       });
-      return;
     }
 
     // Validate start IP is before end IP
@@ -52,11 +50,10 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     }
     
     if (!startBeforeEnd) {
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         error: 'Start IP must be less than or equal to end IP',
       });
-      return;
     }
 
     // Check for conflicts with existing IPs
@@ -72,12 +69,11 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (conflictingIps.length > 0) {
-      res.status(409).json({
+      return res.status(409).json({
         success: false,
         error: 'IP range conflicts with existing assigned IPs',
         conflicts: conflictingIps.map(ip => ip.ipAddress),
       });
-      return;
     }
 
     // Create reservation
@@ -147,7 +143,7 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
   }
 };
 
-export const getReservations = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getReservations = async (req: AuthRequest, res: Response) => {
   try {
     const { subnetId, search } = req.query;
 
@@ -188,7 +184,7 @@ export const getReservations = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-export const getReservationById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getReservationById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -200,11 +196,10 @@ export const getReservationById = async (req: AuthRequest, res: Response): Promi
     });
 
     if (!reservation) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
-      return;
     }
 
     res.json({
@@ -216,7 +211,7 @@ export const getReservationById = async (req: AuthRequest, res: Response): Promi
   }
 };
 
-export const updateReservation = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateReservation = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const validatedData = updateReservationSchema.parse(req.body);
@@ -226,11 +221,10 @@ export const updateReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!reservation) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
-      return;
     }
 
     const updateData: any = { ...validatedData };
@@ -252,7 +246,7 @@ export const updateReservation = async (req: AuthRequest, res: Response): Promis
   }
 };
 
-export const deleteReservation = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteReservation = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -261,11 +255,10 @@ export const deleteReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!reservation) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
-      return;
     }
 
     // Release reserved IPs
@@ -274,11 +267,10 @@ export const deleteReservation = async (req: AuthRequest, res: Response): Promis
     });
     
     if (!subnet) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
-      return;
     }
 
     // For large ranges, delete by range instead of individual IPs

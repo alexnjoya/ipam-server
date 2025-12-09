@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../types/index.js';
 import { prisma } from '../index.js';
 
-export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAuditLogs = async (req: AuthRequest, res: Response) => {
   try {
     const { page = 1, limit = 50, action, ipAddressId, search } = req.query;
 
@@ -64,7 +64,7 @@ export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<voi
   }
 };
 
-export const getAuditLogById = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getAuditLogById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -80,11 +80,10 @@ export const getAuditLogById = async (req: AuthRequest, res: Response): Promise<
     });
 
     if (!log) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'Audit log not found',
       });
-      return;
     }
 
     res.json({

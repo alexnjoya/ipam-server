@@ -6,17 +6,12 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "postinstall": "npx prisma@5.19.0 generate",
-    "build": "npx prisma@5.19.0 generate && tsc && node postbuild.js",
-    "start": "node start.js",
-    "prisma:generate": "npx prisma@5.19.0 generate",
-    "prisma:migrate": "npx prisma@5.19.0 migrate dev",
-    "prisma:studio": "npx prisma@5.19.0 studio",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
   },
   "keywords": [
     "ipam",
@@ -27,8 +22,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "5.19.0",
-    "prisma": "5.19.0",
+    "@prisma/client": "^5.19.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -46,6 +40,7 @@
     "@types/node": "^20.14.10",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^5.19.0",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3"
   }

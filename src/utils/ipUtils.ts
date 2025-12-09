@@ -265,8 +265,8 @@ export function isIpv6InSubnet(ip: string, networkAddress: string, subnetMask: n
   const ipNum = ipv6ToBigInt(ip);
   const networkNum = ipv6ToBigInt(networkAddress);
   const maskBits = BigInt(128 - subnetMask);
-  // const mask = (BigInt(0xFFFFFFFFFFFFFFFF) << maskBits) & BigInt(0xFFFFFFFFFFFFFFFF);
-  // const subnetMaskBig = (BigInt(0xFFFFFFFFFFFFFFFF) << maskBits) & BigInt(0xFFFFFFFFFFFFFFFF);
+  const mask = (BigInt(0xFFFFFFFFFFFFFFFF) << maskBits) & BigInt(0xFFFFFFFFFFFFFFFF);
+  const subnetMaskBig = (BigInt(0xFFFFFFFFFFFFFFFF) << maskBits) & BigInt(0xFFFFFFFFFFFFFFFF);
   
   // For IPv6, we need to check the network portion
   const ipNetwork = ipNum >> maskBits;

@@ -16,7 +16,7 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(6),
 });
 
-export const register = async (req: AuthRequest, res: Response): Promise<void> => {
+export const register = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = registerSchema.parse(req.body);
 
@@ -31,11 +31,10 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
     });
 
     if (existingUser) {
-      res.status(409).json({
+      return res.status(409).json({
         success: false,
         error: 'User with this email or username already exists',
       });
-      return;
     }
 
     // Hash password
@@ -78,7 +77,7 @@ export const register = async (req: AuthRequest, res: Response): Promise<void> =
   }
 };
 
-export const login = async (req: AuthRequest, res: Response): Promise<void> => {
+export const login = async (req: AuthRequest, res: Response) => {
   try {
     const validatedData = loginSchema.parse(req.body);
 
@@ -88,11 +87,10 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Invalid email or password',
       });
-      return;
     }
 
     // Verify password
@@ -102,11 +100,10 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
     );
 
     if (!isValidPassword) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Invalid email or password',
       });
-      return;
     }
 
     // Generate token
@@ -134,14 +131,13 @@ export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   }
 };
 
-export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getMe = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Not authenticated',
       });
-      return;
     }
 
     const user = await prisma.user.findUnique({
@@ -157,11 +153,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
     });
 
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'User not found',
       });
-      return;
     }
 
     res.json({
@@ -173,14 +168,13 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
   }
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Not authenticated',
       });
-      return;
     }
 
     const validatedData = updateProfileSchema.parse(req.body);
@@ -202,11 +196,10 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
       });
 
       if (existingUser) {
-        res.status(409).json({
+        return res.status(409).json({
           success: false,
           error: 'Email or username already taken',
         });
-        return;
       }
     }
 
@@ -231,14 +224,13 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
   }
 };
 
-export const changePassword = async (req: AuthRequest, res: Response): Promise<void> => {
+export const changePassword = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Not authenticated',
       });
-      return;
     }
 
     const validatedData = changePasswordSchema.parse(req.body);
@@ -249,11 +241,10 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
     });
 
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         error: 'User not found',
       });
-      return;
     }
 
     // Verify current password
@@ -263,11 +254,10 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
     );
 
     if (!isValidPassword) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Current password is incorrect',
       });
-      return;
     }
 
     // Hash new password
