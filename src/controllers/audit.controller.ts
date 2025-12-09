@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../types/index.js';
 import { prisma } from '../index.js';
 
-export const getAuditLogs = async (req: AuthRequest, res: Response) => {
+export const getAuditLogs = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { page = 1, limit = 50, action, ipAddressId, search } = req.query;
 

@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../types/index.js';
 import { prisma } from '../index.js';
-import { generateCidr, getSubnetRange, isValidIp, detectIpVersion } from '../utils/ipUtils.js';
+import { generateCidr, getSubnetRange, detectIpVersion } from '../utils/ipUtils.js';
 import { createSubnetSchema, updateSubnetSchema, getSubnetsQuerySchema } from '../validations/subnet.validation.js';
 
 export const createSubnet = async (req: AuthRequest, res: Response) => {

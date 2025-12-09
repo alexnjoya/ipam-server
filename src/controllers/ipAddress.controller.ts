@@ -9,7 +9,6 @@ import {
   numberToIpv4,
   ipv6ToBigInt,
   bigIntToIpv6,
-  detectIpVersion
 } from '../utils/ipUtils.js';
 import { assignIpSchema, updateIpSchema, getIpAddressesQuerySchema } from '../validations/ipAddress.validation.js';
 
@@ -30,7 +29,7 @@ export const assignIpAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    let assignedIp: string;
+    let assignedIp: string | undefined;
 
     if (ipAddress) {
       // Manual assignment
@@ -126,6 +125,13 @@ export const assignIpAddress = async (req: AuthRequest, res: Response) => {
     }
 
     // Create or update IP address
+    if (!assignedIp) {
+      return res.status(400).json({
+        success: false,
+        error: 'Failed to assign IP address',
+      });
+    }
+
     const ipAddressRecord = await prisma.ipAddress.upsert({
       where: { ipAddress: assignedIp },
       update: {
