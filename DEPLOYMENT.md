@@ -14,18 +14,28 @@ server
 npm run build
 ```
 
-### 3. Start Command (IMPORTANT!)
-**MUST be set to:**
+### 3. Start Command (CRITICAL - MUST BE EXACT!)
+**MUST be set to EXACTLY:**
 ```
 npm start
 ```
 
 **DO NOT use:**
-- ❌ `node dist/index.js`
+- ❌ `node dist/index.js` ← This is what's causing your error!
 - ❌ `node start.js`
 - ❌ `npm run start`
+- ❌ `cd server && npm start` (unless Root Directory is wrong)
 
-The `npm start` command will use the `start.js` script which automatically finds `dist/index.js` in multiple possible locations.
+**Why `npm start`?**
+- Uses the `start.js` script which automatically finds `dist/index.js` in multiple possible locations
+- Works regardless of Render's working directory
+- Handles all edge cases
+
+**If you're still getting errors:**
+1. Double-check the Start Command field in Render dashboard
+2. Make sure there are no extra spaces or characters
+3. Save the settings
+4. Trigger a manual redeploy (don't just wait for auto-deploy)
 
 ## Environment Variables
 
