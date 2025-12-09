@@ -44,6 +44,13 @@ app.use(cors({
       return callback(null, true);
     }
     
+    // In development, allow all localhost origins
+    if (process.env.NODE_ENV !== 'production') {
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+        return callback(null, true);
+      }
+    }
+    
     // Normalize origin (remove trailing slash)
     const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
     
@@ -69,6 +76,19 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Test endpoint to verify routes are working
+app.get('/api/test', (_req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'API routes are working',
+    routes: {
+      auth: '/api/auth',
+      login: '/api/auth/login',
+      register: '/api/auth/register'
+    }
+  });
+});
+
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -83,6 +103,12 @@ app.use('/api/reservations', reservationRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/users', userRoutes);
+
+// Log registered routes for debugging
+console.log('Registered routes:');
+console.log('  POST /api/auth/login');
+console.log('  POST /api/auth/register');
+console.log('  GET /api/auth/me');
 
 // Error handling middleware (must be last)
 app.use(notFoundHandler);
