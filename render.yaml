@@ -13,4 +13,6 @@ services:
         sync: false
       - key: JWT_EXPIRES_IN
         value: 7d
+      - key: CORS_ORIGIN
+        value: http://localhost:5173,https://ipam-pi.vercel.app
 
