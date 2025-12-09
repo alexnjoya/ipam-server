@@ -5,11 +5,16 @@ import { existsSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Try different possible locations
+// Try different possible locations (Render might run from different directories)
 const possiblePaths = [
   resolve(__dirname, 'dist', 'index.js'),
   resolve(__dirname, '..', 'dist', 'index.js'),
   resolve(process.cwd(), 'dist', 'index.js'),
+  resolve(process.cwd(), '..', 'dist', 'index.js'),
+  resolve(__dirname, '..', '..', 'dist', 'index.js'),
+  // If Render runs from src directory
+  resolve(__dirname, '..', '..', 'server', 'dist', 'index.js'),
+  resolve(process.cwd(), 'server', 'dist', 'index.js'),
 ];
 
 let distPath = null;
