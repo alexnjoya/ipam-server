@@ -248,11 +248,18 @@ This project is configured for deployment on Render.com. Follow these steps:
 
 1. **Create a new Web Service** on Render
 2. **Connect your repository** (GitHub/GitLab)
-3. **Configure the service:**
+3. **Configure the service (CRITICAL - READ CAREFULLY):**
    - **Root Directory:** `server` (if your repo has both client and server)
    - **Build Command:** `npm run build`
-   - **Start Command:** `npm start`
+   - **Start Command:** `npm start` ⚠️ **MUST BE `npm start` - NOT `node dist/index.js`**
    - **Node Version:** 18 or higher (specified in `package.json` engines)
+
+**⚠️ IMPORTANT:** The Start Command **MUST** be set to `npm start`. 
+- ❌ **DO NOT use:** `node dist/index.js`
+- ❌ **DO NOT use:** `node start.js`
+- ✅ **MUST use:** `npm start`
+
+The `npm start` command uses the `start.js` script which automatically locates `dist/index.js` regardless of Render's working directory.
 
 4. **Set Environment Variables** in Render dashboard:
    - `DATABASE_URL` - Your PostgreSQL connection string
@@ -281,11 +288,18 @@ This project is configured for deployment on Render.com. Follow these steps:
 
 ### Troubleshooting
 
+**Error: "Cannot find module '/opt/render/project/src/dist/index.js'":**
+- **This means Render is NOT using `npm start`**
+- Go to Render Dashboard → Your Service → Settings → Start Command
+- Change it to: `npm start` (NOT `node dist/index.js`)
+- Save and redeploy
+
 **Build fails with "prisma: not found":**
 - Ensure `prisma` is in `dependencies` (not just `devDependencies`)
 - The build script uses `npx prisma@5.19.0 generate` to ensure the correct version
 
 **Cannot find module 'dist/index.js':**
+- Verify Start Command is set to `npm start` (not `node dist/index.js`)
 - The `start.js` script searches multiple paths automatically
 - Check that the build completed successfully
 - Verify the `dist/` folder exists after build
@@ -293,6 +307,8 @@ This project is configured for deployment on Render.com. Follow these steps:
 **Prisma version mismatch:**
 - Both `prisma` and `@prisma/client` are pinned to `5.19.0`
 - Delete `node_modules` and `package-lock.json`, then run `npm install` again
+
+**For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)**
 
 ## License
 
