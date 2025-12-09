@@ -19,7 +19,7 @@ const updateUserSchema = z.object({
   role: z.enum(['admin', 'user', 'readonly']).optional(),
 });
 
-export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getUsers = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -61,10 +61,11 @@ export const getUserById = async (req: AuthRequest, res: Response): Promise<void
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'User not found',
       });
+      return;
     }
 
     res.json({
@@ -91,10 +92,11 @@ export const createUser = async (req: AuthRequest, res: Response): Promise<void>
     });
 
     if (existingUser) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         error: 'User with this email or username already exists',
       });
+      return;
     }
 
     const passwordHash = await hashPassword(validatedData.password);
@@ -124,7 +126,7 @@ export const createUser = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => { {
+export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const validatedData = updateUserSchema.parse(req.body);
@@ -134,10 +136,11 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'User not found',
       });
+      return;
     }
 
     const updateData: any = { ...validatedData };
@@ -167,16 +170,17 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response): Promise<void> => { {
+export const deleteUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
     // Prevent deleting yourself
     if (id === req.user?.id) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Cannot delete your own account',
       });
+      return;
     }
 
     const user = await prisma.user.findUnique({
@@ -184,10 +188,11 @@ export const deleteUser = async (req: AuthRequest, res: Response): Promise<void>
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'User not found',
       });
+      return;
     }
 
     await prisma.user.delete({

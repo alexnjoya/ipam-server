@@ -11,8 +11,8 @@ export function generateToken(payload: {
   role: string;
 }): string {
   return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN as string | number,
-  });
+    expiresIn: JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string): JwtUserPayload {

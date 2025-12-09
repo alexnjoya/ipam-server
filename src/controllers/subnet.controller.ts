@@ -26,10 +26,11 @@ export const createSubnet = async (req: AuthRequest, res: Response): Promise<voi
     });
 
     if (existingSubnet) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         error: 'Subnet with this network address and mask already exists',
       });
+      return;
     }
 
     // Create subnet
@@ -139,10 +140,11 @@ export const getSubnetById = async (req: AuthRequest, res: Response): Promise<vo
     });
 
     if (!subnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     // Calculate utilization
@@ -189,10 +191,11 @@ export const updateSubnet = async (req: AuthRequest, res: Response): Promise<voi
     });
 
     if (!existingSubnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     // Update CIDR if network address or mask changed
@@ -230,10 +233,11 @@ export const deleteSubnet = async (req: AuthRequest, res: Response): Promise<voi
     });
 
     if (!subnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     await prisma.subnet.delete({

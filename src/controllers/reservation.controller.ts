@@ -21,24 +21,27 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!subnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     // Validate IPs are within subnet
-    if (!isIpInSubnet(startIp, subnet.networkAddress, subnet.subnetMask, subnet.ipVersion) ||
-        !isIpInSubnet(endIp, subnet.networkAddress, subnet.subnetMask, subnet.ipVersion)) {
-      return res.status(400).json({
+    const ipVersion = (subnet as any).ipVersion || 'IPv4';
+    if (!isIpInSubnet(startIp, subnet.networkAddress, subnet.subnetMask, ipVersion) ||
+        !isIpInSubnet(endIp, subnet.networkAddress, subnet.subnetMask, ipVersion)) {
+      res.status(400).json({
         success: false,
         error: 'IP range is not within the subnet',
       });
+      return;
     }
 
     // Validate start IP is before end IP
     let startBeforeEnd = false;
-    if (subnet.ipVersion === 'IPv6') {
+    if (ipVersion === 'IPv6') {
       const startNum = ipv6ToBigInt(startIp);
       const endNum = ipv6ToBigInt(endIp);
       startBeforeEnd = startNum <= endNum;
@@ -49,10 +52,11 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     }
     
     if (!startBeforeEnd) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'Start IP must be less than or equal to end IP',
       });
+      return;
     }
 
     // Check for conflicts with existing IPs
@@ -68,11 +72,12 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (conflictingIps.length > 0) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         error: 'IP range conflicts with existing assigned IPs',
         conflicts: conflictingIps.map(ip => ip.ipAddress),
       });
+      return;
     }
 
     // Create reservation
@@ -92,7 +97,7 @@ export const createReservation = async (req: AuthRequest, res: Response): Promis
     const maxIps = 1000;
     let count = 0;
     
-    if (subnet.ipVersion === 'IPv6') {
+    if (ipVersion === 'IPv6') {
       const startNum = ipv6ToBigInt(startIp);
       const endNum = ipv6ToBigInt(endIp);
       let current = startNum;
@@ -195,10 +200,11 @@ export const getReservationById = async (req: AuthRequest, res: Response): Promi
     });
 
     if (!reservation) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
+      return;
     }
 
     res.json({
@@ -220,10 +226,11 @@ export const updateReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!reservation) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
+      return;
     }
 
     const updateData: any = { ...validatedData };
@@ -254,10 +261,11 @@ export const deleteReservation = async (req: AuthRequest, res: Response): Promis
     });
 
     if (!reservation) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Reservation not found',
       });
+      return;
     }
 
     // Release reserved IPs
@@ -266,10 +274,11 @@ export const deleteReservation = async (req: AuthRequest, res: Response): Promis
     });
     
     if (!subnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     // For large ranges, delete by range instead of individual IPs

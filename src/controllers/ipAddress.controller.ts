@@ -23,10 +23,11 @@ export const assignIpAddress = async (req: AuthRequest, res: Response): Promise<
     });
 
     if (!subnet) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Subnet not found',
       });
+      return;
     }
 
     let assignedIp: string | undefined;
@@ -34,17 +35,19 @@ export const assignIpAddress = async (req: AuthRequest, res: Response): Promise<
     if (ipAddress) {
       // Manual assignment
       if (!isValidIp(ipAddress)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'Invalid IP address format',
         });
+        return;
       }
 
       if (!isIpInSubnet(ipAddress, subnet.networkAddress, subnet.subnetMask, subnet.ipVersion)) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: 'IP address is not within the subnet range',
         });
+        return;
       }
 
       // Check if IP already exists
@@ -53,10 +56,11 @@ export const assignIpAddress = async (req: AuthRequest, res: Response): Promise<
       });
 
       if (existingIp && existingIp.status !== 'AVAILABLE') {
-        return res.status(409).json({
+        res.status(409).json({
           success: false,
           error: 'IP address is already assigned or reserved',
         });
+        return;
       }
 
       assignedIp = ipAddress;
@@ -117,18 +121,20 @@ export const assignIpAddress = async (req: AuthRequest, res: Response): Promise<
       }
 
       if (!found || !assignedIp) {
-        return res.status(409).json({
+        res.status(409).json({
           success: false,
           error: 'No available IP addresses in this subnet',
         });
+        return;
       }
     }
 
     if (!assignedIp) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: 'IP address assignment failed',
       });
+      return;
     }
 
     // Create or update IP address
@@ -247,10 +253,11 @@ export const getIpAddressById = async (req: AuthRequest, res: Response): Promise
     });
 
     if (!ipAddress) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'IP address not found',
       });
+      return;
     }
 
     res.json({
@@ -272,10 +279,11 @@ export const updateIpAddress = async (req: AuthRequest, res: Response): Promise<
     });
 
     if (!existingIp) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'IP address not found',
       });
+      return;
     }
 
     const oldValue = { ...existingIp };
@@ -313,10 +321,11 @@ export const releaseIpAddress = async (req: AuthRequest, res: Response): Promise
     });
 
     if (!existingIp) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'IP address not found',
       });
+      return;
     }
 
     const oldValue = { ...existingIp };

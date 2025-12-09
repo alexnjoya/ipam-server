@@ -80,10 +80,11 @@ export const getAuditLogById = async (req: AuthRequest, res: Response): Promise<
     });
 
     if (!log) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         error: 'Audit log not found',
       });
+      return;
     }
 
     res.json({
