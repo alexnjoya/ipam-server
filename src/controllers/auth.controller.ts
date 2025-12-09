@@ -16,7 +16,7 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(6),
 });
 
-export const register = async (req: AuthRequest, res: Response) => {
+export const register = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = registerSchema.parse(req.body);
 
@@ -31,10 +31,11 @@ export const register = async (req: AuthRequest, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         error: 'User with this email or username already exists',
       });
+      return;
     }
 
     // Hash password
@@ -77,7 +78,7 @@ export const register = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const login = async (req: AuthRequest, res: Response) => {
+export const login = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = loginSchema.parse(req.body);
 
@@ -131,7 +132,7 @@ export const login = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getMe = async (req: AuthRequest, res: Response) => {
+export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -168,7 +169,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateProfile = async (req: AuthRequest, res: Response) => {
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -224,7 +225,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const changePassword = async (req: AuthRequest, res: Response) => {
+export const changePassword = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       return res.status(401).json({

@@ -8,12 +8,11 @@ import {
   ipv4ToNumber, 
   numberToIpv4,
   ipv6ToBigInt,
-  bigIntToIpv6,
-  detectIpVersion
+  bigIntToIpv6
 } from '../utils/ipUtils.js';
 import { assignIpSchema, updateIpSchema, getIpAddressesQuerySchema } from '../validations/ipAddress.validation.js';
 
-export const assignIpAddress = async (req: AuthRequest, res: Response) => {
+export const assignIpAddress = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = assignIpSchema.parse(req.body);
     const { subnetId, ipAddress, ...ipData } = validatedData;
@@ -30,7 +29,7 @@ export const assignIpAddress = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    let assignedIp: string;
+    let assignedIp: string | undefined;
 
     if (ipAddress) {
       // Manual assignment
@@ -117,12 +116,19 @@ export const assignIpAddress = async (req: AuthRequest, res: Response) => {
         }
       }
 
-      if (!found) {
+      if (!found || !assignedIp) {
         return res.status(409).json({
           success: false,
           error: 'No available IP addresses in this subnet',
         });
       }
+    }
+
+    if (!assignedIp) {
+      return res.status(400).json({
+        success: false,
+        error: 'IP address assignment failed',
+      });
     }
 
     // Create or update IP address
@@ -164,7 +170,7 @@ export const assignIpAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getIpAddresses = async (req: AuthRequest, res: Response) => {
+export const getIpAddresses = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const query = getIpAddressesQuerySchema.parse(req.query);
     const { page, limit, search, status, subnetId } = query;
@@ -225,7 +231,7 @@ export const getIpAddresses = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getIpAddressById = async (req: AuthRequest, res: Response) => {
+export const getIpAddressById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -256,7 +262,7 @@ export const getIpAddressById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateIpAddress = async (req: AuthRequest, res: Response) => {
+export const updateIpAddress = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const validatedData = updateIpSchema.parse(req.body);
@@ -298,7 +304,7 @@ export const updateIpAddress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const releaseIpAddress = async (req: AuthRequest, res: Response) => {
+export const releaseIpAddress = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 

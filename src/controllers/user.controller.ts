@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../types/index.js';
 import { prisma } from '../index.js';
 import { hashPassword } from '../utils/password.js';
-import { authorize } from '../middleware/auth.middleware.js';
+// import { authorize } from '../middleware/auth.middleware.js';
 import { z } from 'zod';
 
 const createUserSchema = z.object({
@@ -19,7 +19,7 @@ const updateUserSchema = z.object({
   role: z.enum(['admin', 'user', 'readonly']).optional(),
 });
 
-export const getUsers = async (req: AuthRequest, res: Response) => {
+export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -44,7 +44,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUserById = async (req: AuthRequest, res: Response) => {
+export const getUserById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -76,7 +76,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const createUser = async (req: AuthRequest, res: Response) => {
+export const createUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = createUserSchema.parse(req.body);
 
@@ -124,7 +124,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateUser = async (req: AuthRequest, res: Response) => {
+export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => { {
   try {
     const { id } = req.params;
     const validatedData = updateUserSchema.parse(req.body);
@@ -167,7 +167,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
+export const deleteUser = async (req: AuthRequest, res: Response): Promise<void> => { {
   try {
     const { id } = req.params;
 

@@ -10,7 +10,7 @@ import {
 } from '../utils/ipUtils.js';
 import { createReservationSchema, updateReservationSchema } from '../validations/reservation.validation.js';
 
-export const createReservation = async (req: AuthRequest, res: Response) => {
+export const createReservation = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = createReservationSchema.parse(req.body);
     const { subnetId, startIp, endIp, ...reservationData } = validatedData;
@@ -142,7 +142,7 @@ export const createReservation = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getReservations = async (req: AuthRequest, res: Response) => {
+export const getReservations = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { subnetId, search } = req.query;
 
@@ -183,7 +183,7 @@ export const getReservations = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getReservationById = async (req: AuthRequest, res: Response) => {
+export const getReservationById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -210,7 +210,7 @@ export const getReservationById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateReservation = async (req: AuthRequest, res: Response) => {
+export const updateReservation = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const validatedData = updateReservationSchema.parse(req.body);
@@ -245,7 +245,7 @@ export const updateReservation = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteReservation = async (req: AuthRequest, res: Response) => {
+export const deleteReservation = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 

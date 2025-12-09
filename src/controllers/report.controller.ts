@@ -20,7 +20,7 @@ interface Totals {
   availableIPs: number;
 }
 
-export const getUtilizationReport = async (_req: AuthRequest, res: Response) => {
+export const getUtilizationReport = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const subnets = await prisma.subnet.findMany({
       include: {
@@ -34,7 +34,7 @@ export const getUtilizationReport = async (_req: AuthRequest, res: Response) => 
 
     const report = await Promise.all(
       subnets.map(async (subnet: typeof subnets[number]) => {
-        const range = getSubnetRange(subnet.networkAddress, subnet.subnetMask, subnet.ipVersion);
+        const range = getSubnetRange(subnet.networkAddress, subnet.subnetMask, (subnet as any).ipVersion || 'IPv4');
         const usedCount = await prisma.ipAddress.count({
           where: {
             subnetId: subnet.id,
@@ -86,7 +86,7 @@ export const getUtilizationReport = async (_req: AuthRequest, res: Response) => 
   }
 };
 
-export const getStatusReport = async (_req: AuthRequest, res: Response) => {
+export const getStatusReport = async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
     const statusCounts = await prisma.ipAddress.groupBy({
       by: ['status'],

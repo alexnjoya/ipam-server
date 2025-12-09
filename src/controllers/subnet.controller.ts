@@ -1,10 +1,10 @@
 import { Response } from 'express';
 import { AuthRequest } from '../types/index.js';
 import { prisma } from '../index.js';
-import { generateCidr, getSubnetRange, isValidIp, detectIpVersion } from '../utils/ipUtils.js';
+import { generateCidr, getSubnetRange, detectIpVersion } from '../utils/ipUtils.js';
 import { createSubnetSchema, updateSubnetSchema, getSubnetsQuerySchema } from '../validations/subnet.validation.js';
 
-export const createSubnet = async (req: AuthRequest, res: Response) => {
+export const createSubnet = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const validatedData = createSubnetSchema.parse(req.body);
 
@@ -55,7 +55,7 @@ export const createSubnet = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getSubnets = async (req: AuthRequest, res: Response) => {
+export const getSubnets = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const query = getSubnetsQuerySchema.parse(req.query);
     const { page, limit, search, location, vlanId } = query;
@@ -115,7 +115,7 @@ export const getSubnets = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getSubnetById = async (req: AuthRequest, res: Response) => {
+export const getSubnetById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -178,7 +178,7 @@ export const getSubnetById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateSubnet = async (req: AuthRequest, res: Response) => {
+export const updateSubnet = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const validatedData = updateSubnetSchema.parse(req.body);
@@ -221,7 +221,7 @@ export const updateSubnet = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteSubnet = async (req: AuthRequest, res: Response) => {
+export const deleteSubnet = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
